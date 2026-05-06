@@ -15,6 +15,8 @@
       --accent: #7c3f00;
       --accent-soft: #f3e8de;
       --ok: #0f766e;
+      --danger: #b91c1c;
+      --danger-soft: #fee2e2;
     }
 
     * { box-sizing: border-box; }
@@ -140,6 +142,18 @@
       border-color: var(--accent);
     }
 
+    button.secondary {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--accent-soft);
+    }
+
+    button.danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+      border-color: var(--danger-soft);
+    }
+
     button:hover {
       opacity: 0.95;
     }
@@ -252,6 +266,38 @@
       gap: 12px;
       flex-wrap: wrap;
     }
+
+    .saved-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .saved-actions button {
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: end;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 760px) {
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .small-note {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
   </style>
 </head>
 <body>
@@ -260,7 +306,7 @@
       <div class="header-row">
         <div>
           <h1 class="title">☕ Espresso Dial-In App</h1>
-          <p class="subtitle">Einfache GitHub-Pages-Version ohne React-Build. Eine Datei hochladen, GitHub Pages aktivieren, fertig.</p>
+          <p class="subtitle">GitHub-Pages-Version ohne React-Build. Jetzt mit Rezepte laden, einzeln löschen, alle löschen und Filter nach Röster/Hersteller.</p>
         </div>
         <div class="badge" id="confidenceBadge">Confidence 0%</div>
       </div>
@@ -277,7 +323,7 @@
             <input id="beanName" type="text" placeholder="z. B. House Blend / Yirgacheffe" />
           </div>
           <div class="field">
-            <label for="roaster">Röster</label>
+            <label for="roaster">Röster / Hersteller</label>
             <input id="roaster" type="text" placeholder="z. B. lokale Rösterei" />
           </div>
         </div>
@@ -407,8 +453,25 @@
     </div>
 
     <div class="card" style="margin-top: 16px;">
-      <h2 class="section-title">Gespeicherte Rezepte (lokal auf deinem Gerät)</h2>
-      <p class="section-subtitle">Diese Daten werden im Browser gespeichert. Bei GitHub Pages liegen deine Rezepte also nicht auf GitHub, sondern lokal auf deinem Handy oder PC.</p>
+      <div class="header-row">
+        <div>
+          <h2 class="section-title">Gespeicherte Rezepte (lokal auf deinem Gerät)</h2>
+          <p class="section-subtitle">Jetzt mit Laden, einzeln Löschen und Filter nach Röster/Hersteller.</p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="field">
+          <label for="roasterFilter">Nach Röster / Hersteller filtern</label>
+          <select id="roasterFilter">
+            <option value="">Alle anzeigen</option>
+          </select>
+          <div class="small-note">Es werden nur gespeicherte Rezepte dieses Rösters angezeigt.</div>
+        </div>
+        <button id="clearFilterBtn">Filter zurücksetzen</button>
+        <button class="danger" id="deleteAllRecipesBtn">Alle Rezepte löschen</button>
+      </div>
+
       <div id="savedRecipes"></div>
     </div>
   </div>
@@ -432,6 +495,8 @@
       roaster: "",
     };
 
+    let currentRoasterFilter = "";
+
     const fields = {
       beanName: document.getElementById("beanName"),
       roaster: document.getElementById("roaster"),
@@ -446,6 +511,8 @@
       origin: document.getElementById("origin"),
       flavorTarget: document.getElementById("flavorTarget"),
     };
+
+    const roasterFilterEl = document.getElementById("roasterFilter");
 
     function clamp(num, min, max) {
       return Math.min(Math.max(num, min), max);
@@ -733,18 +800,73 @@
       }
     }
 
+    function saveAllRecipes(recipes) {
+      localStorage.setItem(STORAGE_KEY_RECIPES, JSON.stringify(recipes));
+    }
+
     function saveRecipeEntry(entry) {
       const saved = loadSavedRecipes();
       saved.unshift(entry);
-      const trimmed = saved.slice(0, 8);
-      localStorage.setItem(STORAGE_KEY_RECIPES, JSON.stringify(trimmed));
+      const trimmed = saved.slice(0, 30);
+      saveAllRecipes(trimmed);
       renderSavedRecipes();
+    }
+
+    function deleteRecipeById(id) {
+      const saved = loadSavedRecipes().filter(item => String(item.id) !== String(id));
+      saveAllRecipes(saved);
+      renderSavedRecipes();
+    }
+
+    function deleteAllRecipes() {
+      localStorage.removeItem(STORAGE_KEY_RECIPES);
+      currentRoasterFilter = "";
+      renderSavedRecipes();
+    }
+
+    function loadRecipeIntoForm(id) {
+      const saved = loadSavedRecipes();
+      const entry = saved.find(item => String(item.id) === String(id));
+      if (!entry) return;
+      setForm(entry.form || defaults);
+      updateAll();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function getUniqueRoasters(recipes) {
+      return [...new Set(
+        recipes
+          .map(item => (item.roaster || "").trim())
+          .filter(Boolean)
+      )].sort((a, b) => a.localeCompare(b, "de"));
+    }
+
+    function renderRoasterFilterOptions(recipes) {
+      const roasters = getUniqueRoasters(recipes);
+      roasterFilterEl.innerHTML = '<option value="">Alle anzeigen</option>';
+
+      roasters.forEach(roaster => {
+        const option = document.createElement("option");
+        option.value = roaster;
+        option.textContent = roaster;
+        roasterFilterEl.appendChild(option);
+      });
+
+      if (currentRoasterFilter && !roasters.includes(currentRoasterFilter)) {
+        currentRoasterFilter = "";
+      }
+      roasterFilterEl.value = currentRoasterFilter;
     }
 
     function renderSavedRecipes() {
       const host = document.getElementById("savedRecipes");
       const saved = loadSavedRecipes();
+      renderRoasterFilterOptions(saved);
       host.innerHTML = "";
+
+      const filtered = currentRoasterFilter
+        ? saved.filter(item => (item.roaster || "").trim() === currentRoasterFilter)
+        : saved;
 
       if (!saved.length) {
         const empty = document.createElement("div");
@@ -754,10 +876,18 @@
         return;
       }
 
+      if (!filtered.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "Für diesen Röster/Hersteller sind aktuell keine gespeicherten Rezepte vorhanden.";
+        host.appendChild(empty);
+        return;
+      }
+
       const grid = document.createElement("div");
       grid.className = "saved-grid";
 
-      saved.forEach(item => {
+      filtered.forEach(item => {
         const div = document.createElement("div");
         div.className = "saved-item";
         div.innerHTML = `
@@ -774,11 +904,28 @@
             <div class="info-box" style="margin-top:0;">${item.result.time}</div>
             <div class="info-box" style="margin-top:0;">${item.result.temp} °C</div>
           </div>
+          <div class="saved-actions">
+            <button class="secondary load-recipe-btn" data-id="${item.id}">Laden</button>
+            <button class="danger delete-recipe-btn" data-id="${item.id}">Löschen</button>
+          </div>
         `;
         grid.appendChild(div);
       });
 
       host.appendChild(grid);
+
+      document.querySelectorAll(".load-recipe-btn").forEach(btn => {
+        btn.addEventListener("click", () => loadRecipeIntoForm(btn.dataset.id));
+      });
+
+      document.querySelectorAll(".delete-recipe-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const beanName = btn.closest(".saved-item")?.querySelector("[style*='font-weight:700']")?.textContent || "dieses Rezept";
+          if (confirm(`Rezept '${beanName}' wirklich löschen?`)) {
+            deleteRecipeById(btn.dataset.id);
+          }
+        });
+      });
     }
 
     function escapeHtml(value) {
@@ -826,6 +973,7 @@
       setForm(defaults);
       updateAll();
     });
+
     document.getElementById("saveRecipeBtn").addEventListener("click", () => {
       const { form, result } = updateAll();
       saveRecipeEntry({
@@ -835,6 +983,25 @@
         form,
         result,
       });
+    });
+
+    roasterFilterEl.addEventListener("change", () => {
+      currentRoasterFilter = roasterFilterEl.value;
+      renderSavedRecipes();
+    });
+
+    document.getElementById("clearFilterBtn").addEventListener("click", () => {
+      currentRoasterFilter = "";
+      roasterFilterEl.value = "";
+      renderSavedRecipes();
+    });
+
+    document.getElementById("deleteAllRecipesBtn").addEventListener("click", () => {
+      const saved = loadSavedRecipes();
+      if (!saved.length) return;
+      if (confirm("Wirklich ALLE gespeicherten Rezepte löschen?")) {
+        deleteAllRecipes();
+      }
     });
 
     setForm(loadFormLocally());
