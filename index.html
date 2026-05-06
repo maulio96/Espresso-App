@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1f2937" />
+  <title>Espresso Dial-In App</title>
+  <style>
+    :root {
+      --bg: #f5f5f4;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #7c3f00;
+      --accent-soft: #f3e8de;
+      --ok: #0f766e;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .hero, .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+
+    .hero {
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .title {
+      margin: 0 0 6px 0;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card { padding: 18px; }
+    .card h2, .card h3 { margin-top: 0; }
+    .section-title {
+      margin-bottom: 6px;
+      font-size: 22px;
+    }
+    .section-subtitle {
+      margin-top: 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .form-grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    @media (max-width: 720px) {
+      .form-grid, .form-grid.three {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    input, select, button {
+      font: inherit;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    button {
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    button:hover {
+      opacity: 0.95;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    @media (max-width: 700px) {
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    .metric {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .info-box {
+      background: #f9fafb;
+      border-radius: 14px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      margin-top: 12px;
+    }
+
+    .info-title {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    ul.clean {
+      list-style: none;
+      padding: 0;
+      margin: 10px 0 0 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    ul.clean li {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fff;
+      padding: 12px;
+      line-height: 1.5;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .saved-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 700px) {
+      .saved-grid { grid-template-columns: 1fr; }
+    }
+
+    .saved-item {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .empty {
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      color: var(--muted);
+      background: #fff;
+      margin-top: 12px;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <div class="header-row">
+        <div>
+          <h1 class="title">☕ Espresso Dial-In App</h1>
+          <p class="subtitle">Einfache GitHub-Pages-Version ohne React-Build. Eine Datei hochladen, GitHub Pages aktivieren, fertig.</p>
+        </div>
+        <div class="badge" id="confidenceBadge">Confidence 0%</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2 class="section-title">Eingaben</h2>
+        <p class="section-subtitle">Pflichtfelder geben den Kern vor. Optionale Felder verfeinern das Startrezept deutlich.</p>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="beanName">Bohnenname</label>
+            <input id="beanName" type="text" placeholder="z. B. House Blend / Yirgacheffe" />
+          </div>
+          <div class="field">
+            <label for="roaster">Röster</label>
+            <input id="roaster" type="text" placeholder="z. B. lokale Rösterei" />
+          </div>
+        </div>
+
+        <div class="form-grid three" style="margin-top: 14px;">
+          <div class="field">
+            <label for="arabica">Arabica %</label>
+            <input id="arabica" type="number" min="0" max="100" />
+          </div>
+          <div class="field">
+            <label for="robusta">Robusta %</label>
+            <input id="robusta" type="number" min="0" max="100" />
+          </div>
+          <div class="field">
+            <label for="basketSize">Basketgröße (g)</label>
+            <input id="basketSize" type="number" min="14" max="24" step="0.5" />
+          </div>
+        </div>
+
+        <div class="form-grid three" style="margin-top: 14px;">
+          <div class="field">
+            <label for="roast">Röstgrad</label>
+            <select id="roast">
+              <option value="1">1 = hell</option>
+              <option value="2">2 = mittel-hell</option>
+              <option value="3">3 = mittel</option>
+              <option value="4">4 = mittel-dunkel</option>
+              <option value="5">5 = dunkel</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="ageDays">Bohnenalter seit Röstdatum (Tage)</label>
+            <input id="ageDays" type="number" min="0" max="120" />
+          </div>
+          <div class="field">
+            <label for="process">Aufbereitung</label>
+            <select id="process">
+              <option value="washed">washed</option>
+              <option value="natural">natural</option>
+              <option value="honey">honey</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid" style="margin-top: 14px;">
+          <div class="field">
+            <label for="drinkStyle">Getränkeziel</label>
+            <select id="drinkStyle">
+              <option value="espresso">Espresso pur</option>
+              <option value="milk">Milchgetränk</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="beanType">Single Origin oder Blend</label>
+            <select id="beanType">
+              <option value="single_origin">Single Origin</option>
+              <option value="blend">Blend</option>
+              <option value="unknown">unbekannt / egal</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid" style="margin-top: 14px;">
+          <div class="field">
+            <label for="origin">Herkunft</label>
+            <select id="origin">
+              <option value="">keine Angabe</option>
+              <option value="ethiopia">Äthiopien</option>
+              <option value="brazil">Brasilien</option>
+              <option value="india">Indien</option>
+              <option value="kenya">Kenia</option>
+              <option value="colombia">Kolumbien</option>
+              <option value="costa_rica">Costa Rica</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="flavorTarget">Geschmacksziel</label>
+            <select id="flavorTarget">
+              <option value="fruity">fruchtig</option>
+              <option value="balanced">balanciert</option>
+              <option value="classic">klassisch-schokoladig</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button class="primary" id="fillExampleBtn">Beispiel laden</button>
+          <button id="saveRecipeBtn">Rezept speichern</button>
+          <button id="resetBtn">Zurücksetzen</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Ausgabe / Startrezept</h2>
+        <p class="section-subtitle">So kann die App direkt ein Rezept, Mahlgrad-Tendenz und Flow-Profil ausgeben.</p>
+
+        <div class="metrics">
+          <div class="metric"><div class="metric-label">Dose</div><div class="metric-value" id="doseOut">18.0 g</div></div>
+          <div class="metric"><div class="metric-label">Yield / Output</div><div class="metric-value" id="yieldOut">40 g</div></div>
+          <div class="metric"><div class="metric-label">Ratio</div><div class="metric-value" id="ratioOut">1:2.2</div></div>
+          <div class="metric"><div class="metric-label">Temperatur</div><div class="metric-value" id="tempOut">93.0 °C</div></div>
+          <div class="metric"><div class="metric-label">Zielzeit</div><div class="metric-value" id="timeOut">29–31 s</div></div>
+          <div class="metric"><div class="metric-label">Preinfusion</div><div class="metric-value" id="preinfOut">4 s</div></div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">Mahlgrad-Tendenz</div>
+          <div id="grindTextOut">neutral starten</div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">Geschmacksprognose</div>
+          <div id="tastePredictionOut">balanciert, mittlerer Körper, gute Süße</div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">Flow-/Druckprofil</div>
+          <div id="pressureProfileOut">3–5 s sanft anfahren, dann auf 8–9 bar öffnen, am Ende leicht abfallen lassen</div>
+        </div>
+
+        <h3 style="margin-top: 18px;">Warum diese Empfehlung?</h3>
+        <ul class="clean" id="notesList"></ul>
+
+        <h3 style="margin-top: 18px;">Dial-In nach Shot 1</h3>
+        <ul class="clean" id="correctionHintsList"></ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 16px;">
+      <h2 class="section-title">Gespeicherte Rezepte (lokal auf deinem Gerät)</h2>
+      <p class="section-subtitle">Diese Daten werden im Browser gespeichert. Bei GitHub Pages liegen deine Rezepte also nicht auf GitHub, sondern lokal auf deinem Handy oder PC.</p>
+      <div id="savedRecipes"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY_FORM = "espressoDialInForm";
+    const STORAGE_KEY_RECIPES = "espressoDialInSavedRecipes";
+
+    const defaults = {
+      arabica: 80,
+      robusta: 20,
+      roast: 3,
+      ageDays: 14,
+      process: "washed",
+      drinkStyle: "espresso",
+      basketSize: 18,
+      beanType: "blend",
+      origin: "brazil",
+      flavorTarget: "balanced",
+      beanName: "",
+      roaster: "",
+    };
+
+    const fields = {
+      beanName: document.getElementById("beanName"),
+      roaster: document.getElementById("roaster"),
+      arabica: document.getElementById("arabica"),
+      robusta: document.getElementById("robusta"),
+      basketSize: document.getElementById("basketSize"),
+      roast: document.getElementById("roast"),
+      ageDays: document.getElementById("ageDays"),
+      process: document.getElementById("process"),
+      drinkStyle: document.getElementById("drinkStyle"),
+      beanType: document.getElementById("beanType"),
+      origin: document.getElementById("origin"),
+      flavorTarget: document.getElementById("flavorTarget"),
+    };
+
+    function clamp(num, min, max) {
+      return Math.min(Math.max(num, min), max);
+    }
+
+    function round(num, digits = 1) {
+      return Number(num.toFixed(digits));
+    }
+
+    function getForm() {
+      return {
+        beanName: fields.beanName.value,
+        roaster: fields.roaster.value,
+        arabica: Number(fields.arabica.value || 0),
+        robusta: Number(fields.robusta.value || 0),
+        basketSize: Number(fields.basketSize.value || 18),
+        roast: Number(fields.roast.value || 3),
+        ageDays: Number(fields.ageDays.value || 14),
+        process: fields.process.value || "washed",
+        drinkStyle: fields.drinkStyle.value || "espresso",
+        beanType: fields.beanType.value || "blend",
+        origin: fields.origin.value || "",
+        flavorTarget: fields.flavorTarget.value || "balanced",
+      };
+    }
+
+    function setForm(form) {
+      fields.beanName.value = form.beanName ?? "";
+      fields.roaster.value = form.roaster ?? "";
+      fields.arabica.value = form.arabica ?? 80;
+      fields.robusta.value = form.robusta ?? 20;
+      fields.basketSize.value = form.basketSize ?? 18;
+      fields.roast.value = form.roast ?? 3;
+      fields.ageDays.value = form.ageDays ?? 14;
+      fields.process.value = form.process ?? "washed";
+      fields.drinkStyle.value = form.drinkStyle ?? "espresso";
+      fields.beanType.value = form.beanType ?? "blend";
+      fields.origin.value = form.origin ?? "";
+      fields.flavorTarget.value = form.flavorTarget ?? "balanced";
+    }
+
+    function computeRecommendation(form) {
+      const arabica = Number(form.arabica || 0);
+      const robusta = Number(form.robusta || 0);
+      const roast = Number(form.roast || 3);
+      const age = Number(form.ageDays || 14);
+      const basket = Number(form.basketSize || 18);
+      const process = form.process || "washed";
+      const drink = form.drinkStyle || "espresso";
+      const beanType = form.beanType || "blend";
+      const origin = form.origin || "";
+      const flavorTarget = form.flavorTarget || "balanced";
+
+      let dose = basket;
+      let ratio = 2.2;
+      let temp = 93.0;
+      let time = 30;
+      let preinf = 4;
+      let grindHint = 0;
+      let confidence = 70;
+      const notes = [];
+
+      if (arabica + robusta > 0 && Math.abs(arabica + robusta - 100) > 0.5) {
+        notes.push("Arabica + Robusta ergibt nicht 100 %. Die Berechnung bleibt nutzbar, ist aber etwas ungenauer.");
+        confidence -= 8;
+      }
+
+      if (roast === 1) {
+        temp += 2.0;
+        ratio += 0.30;
+        time += 5;
+        preinf += 2;
+        grindHint -= 2.0;
+        notes.push("Helle Röstung: heißer, länger und feiner starten.");
+      } else if (roast === 2) {
+        temp += 1.0;
+        ratio += 0.15;
+        time += 3;
+        preinf += 1;
+        grindHint -= 1.0;
+        notes.push("Mittel-helle Röstung: etwas heißer und etwas längere Ratio.");
+      } else if (roast === 4) {
+        temp -= 1.0;
+        ratio -= 0.15;
+        time -= 3;
+        preinf -= 1;
+        grindHint += 1.0;
+        notes.push("Mittel-dunkle Röstung: etwas kühler und konzentrierter.");
+      } else if (roast === 5) {
+        temp -= 2.0;
+        ratio -= 0.30;
+        time -= 5;
+        preinf -= 2;
+        grindHint += 2.0;
+        notes.push("Dunkle Röstung: kühler, kürzere Ratio und eher gröber starten.");
+      }
+
+      const robustaSteps = robusta / 10;
+      temp -= 0.2 * robustaSteps;
+      ratio -= 0.05 * robustaSteps;
+      time -= 1.0 * robustaSteps;
+      preinf -= 0.5 * robustaSteps;
+      grindHint += 0.3 * robustaSteps;
+      if (robusta >= 20) {
+        notes.push("Mehr Robusta: eher kürzer, kühler und etwas gröber sinnvoll.");
+      }
+
+      if (age < 7) {
+        preinf -= 1;
+        grindHint += 0.5;
+        confidence -= 6;
+        notes.push("Sehr frische Bohnen gasen stärker aus: Bezug kann instabiler sein.");
+      } else if (age >= 7 && age <= 21) {
+        confidence += 5;
+        notes.push("Bohnenalter liegt im typischen Sweet Spot.");
+      } else if (age > 30) {
+        grindHint -= 0.5;
+        temp += 0.5;
+        confidence -= 4;
+        notes.push("Ältere Bohnen: etwas feiner und minimal heißer kann helfen.");
+      }
+
+      if (process === "washed") {
+        temp += 0.5;
+        ratio += 0.10;
+        confidence += 3;
+        notes.push("Washed: etwas klarer und oft mit längerer Ratio stimmig.");
+      } else if (process === "natural") {
+        temp -= 0.5;
+        ratio -= 0.10;
+        notes.push("Natural: etwas süßer und schwerer – nicht unnötig lang ziehen.");
+      } else if (process === "honey") {
+        confidence += 2;
+        notes.push("Honey: meist gut balanciert zwischen Klarheit und Süße.");
+      }
+
+      if (drink === "milk") {
+        ratio -= 0.15;
+        notes.push("Für Milchgetränke etwas konzentrierter sinnvoll.");
+      }
+
+      if (beanType === "single_origin") {
+        preinf += 1;
+        confidence += 4;
+        notes.push("Single Origin: längere Preinfusion und präziseres Dial-In lohnen sich.");
+      } else if (beanType === "blend") {
+        confidence += 3;
+        notes.push("Blend: meist gutmütiger und schneller trinkbar.");
+      }
+
+      if (origin === "ethiopia" || origin === "kenya") {
+        temp += 0.5;
+        ratio += 0.10;
+        grindHint -= 0.3;
+        notes.push("Äthiopien/Kenia: oft fruchtig und heller – etwas heißer/länger passend.");
+      } else if (origin === "brazil") {
+        ratio -= 0.05;
+        temp -= 0.2;
+        notes.push("Brasilien: nussig/schokoladig – etwas kompakter oft stimmig.");
+      } else if (origin === "india") {
+        temp -= 0.2;
+        ratio -= 0.05;
+        notes.push("Indien: oft würzig/kräftig – eher kompakt starten.");
+      } else if (origin === "colombia" || origin === "costa_rica") {
+        ratio += 0.05;
+        confidence += 2;
+        notes.push("Kolumbien/Costa Rica: meist sehr balanciert und dankbar im Dial-In.");
+      }
+
+      if (flavorTarget === "fruity") {
+        temp += 0.5;
+        ratio += 0.10;
+        preinf += 1;
+        grindHint -= 0.3;
+        notes.push("Fruchtiges Ziel: eher heißer, länger und sanfter starten.");
+      } else if (flavorTarget === "classic") {
+        temp -= 0.4;
+        ratio -= 0.10;
+        grindHint += 0.2;
+        notes.push("Klassisch-schokoladig: eher kompakter und leicht kühler.");
+      } else if (flavorTarget === "balanced") {
+        confidence += 2;
+      }
+
+      temp = clamp(temp, 89.5, 96.0);
+      ratio = clamp(ratio, 1.55, 2.70);
+      preinf = clamp(preinf, 0, 10);
+      time = clamp(time, 22, 42);
+      confidence = clamp(confidence, 45, 96);
+
+      const yieldOut = dose * ratio;
+
+      let grindText = "neutral starten";
+      if (grindHint <= -1.75) grindText = "deutlich feiner als Standard";
+      else if (grindHint <= -0.75) grindText = "leicht feiner als Standard";
+      else if (grindHint < 0.75) grindText = "neutral starten";
+      else if (grindHint < 1.75) grindText = "leicht gröber als Standard";
+      else grindText = "deutlich gröber als Standard";
+
+      let tastePrediction = "balanciert, mittlerer Körper, gute Süße";
+      if (ratio >= 2.35 && temp >= 94) tastePrediction = "klarer, heller, fruchtiger mit höherer Transparenz";
+      else if (ratio <= 1.85 && temp <= 92) tastePrediction = "kräftig, dicht, schokoladig mit mehr Körper";
+      else if (robusta >= 20) tastePrediction = "cremig, kräftig, weniger Säure, mehr Punch";
+
+      let pressureProfile = "3–5 s sanft anfahren, dann auf 8–9 bar öffnen, am Ende leicht abfallen lassen";
+      if (beanType === "single_origin" || roast <= 2) {
+        pressureProfile = "5–8 s sanfte Preinfusion, dann 7–8 bar Hauptphase, gegen Ende auf 5–6 bar absenken";
+      }
+      if (roast >= 4 && robusta >= 20) {
+        pressureProfile = "kurze Preinfusion, zügig auf 8–9 bar, Shot eher kompakt halten";
+      }
+
+      const correctionHints = [
+        "Zu sauer/dünn → feiner oder +0.5 °C oder Ratio leicht verlängern.",
+        "Zu bitter/trocken → gröber oder -0.5 °C oder Ratio etwas kürzen.",
+        "Bitter und sauer gleichzeitig → oft Verteilungsproblem / Channeling / Puck Prep prüfen.",
+      ];
+
+      return {
+        dose: round(dose, 1),
+        yieldOut: round(yieldOut, 0),
+        ratio: round(ratio, 2),
+        temp: round(temp, 1),
+        time: `${Math.max(20, Math.round(time - 1))}–${Math.round(time + 1)} s`,
+        preinf: `${round(preinf, 0)} s`,
+        grindText,
+        tastePrediction,
+        pressureProfile,
+        confidence,
+        notes,
+        correctionHints,
+      };
+    }
+
+    function renderResult(result) {
+      document.getElementById("doseOut").textContent = `${result.dose} g`;
+      document.getElementById("yieldOut").textContent = `${result.yieldOut} g`;
+      document.getElementById("ratioOut").textContent = `1:${result.ratio}`;
+      document.getElementById("tempOut").textContent = `${result.temp} °C`;
+      document.getElementById("timeOut").textContent = result.time;
+      document.getElementById("preinfOut").textContent = result.preinf;
+      document.getElementById("grindTextOut").textContent = result.grindText;
+      document.getElementById("tastePredictionOut").textContent = result.tastePrediction;
+      document.getElementById("pressureProfileOut").textContent = result.pressureProfile;
+      document.getElementById("confidenceBadge").textContent = `Confidence ${result.confidence}%`;
+
+      const notesList = document.getElementById("notesList");
+      notesList.innerHTML = "";
+      result.notes.forEach(note => {
+        const li = document.createElement("li");
+        li.textContent = `• ${note}`;
+        notesList.appendChild(li);
+      });
+
+      const correctionHintsList = document.getElementById("correctionHintsList");
+      correctionHintsList.innerHTML = "";
+      result.correctionHints.forEach(hint => {
+        const li = document.createElement("li");
+        li.textContent = hint;
+        correctionHintsList.appendChild(li);
+      });
+    }
+
+    function saveFormLocally(form) {
+      localStorage.setItem(STORAGE_KEY_FORM, JSON.stringify(form));
+    }
+
+    function loadFormLocally() {
+      const raw = localStorage.getItem(STORAGE_KEY_FORM);
+      if (!raw) return { ...defaults };
+      try {
+        return { ...defaults, ...JSON.parse(raw) };
+      } catch {
+        return { ...defaults };
+      }
+    }
+
+    function loadSavedRecipes() {
+      const raw = localStorage.getItem(STORAGE_KEY_RECIPES);
+      if (!raw) return [];
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return [];
+      }
+    }
+
+    function saveRecipeEntry(entry) {
+      const saved = loadSavedRecipes();
+      saved.unshift(entry);
+      const trimmed = saved.slice(0, 8);
+      localStorage.setItem(STORAGE_KEY_RECIPES, JSON.stringify(trimmed));
+      renderSavedRecipes();
+    }
+
+    function renderSavedRecipes() {
+      const host = document.getElementById("savedRecipes");
+      const saved = loadSavedRecipes();
+      host.innerHTML = "";
+
+      if (!saved.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "Noch nichts gespeichert. Trag Werte ein und tippe auf 'Rezept speichern'.";
+        host.appendChild(empty);
+        return;
+      }
+
+      const grid = document.createElement("div");
+      grid.className = "saved-grid";
+
+      saved.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "saved-item";
+        div.innerHTML = `
+          <div class="header-row">
+            <div>
+              <div style="font-weight:700;">${escapeHtml(item.beanName || "Unbenannte Bohne")}</div>
+              <div class="muted" style="font-size:14px;">${escapeHtml(item.roaster || "—")}</div>
+            </div>
+            <div class="badge">${item.result.confidence}%</div>
+          </div>
+          <div style="display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; margin-top:12px;">
+            <div class="info-box" style="margin-top:0;">${item.result.dose} g in</div>
+            <div class="info-box" style="margin-top:0;">${item.result.yieldOut} g out</div>
+            <div class="info-box" style="margin-top:0;">${item.result.time}</div>
+            <div class="info-box" style="margin-top:0;">${item.result.temp} °C</div>
+          </div>
+        `;
+        grid.appendChild(div);
+      });
+
+      host.appendChild(grid);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function updateAll() {
+      const form = getForm();
+      saveFormLocally(form);
+      const result = computeRecommendation(form);
+      renderResult(result);
+      return { form, result };
+    }
+
+    function fillExample() {
+      setForm({
+        arabica: 100,
+        robusta: 0,
+        roast: 2,
+        ageDays: 12,
+        process: "washed",
+        drinkStyle: "espresso",
+        basketSize: 18,
+        beanType: "single_origin",
+        origin: "ethiopia",
+        flavorTarget: "fruity",
+        beanName: "Yirgacheffe Test",
+        roaster: "Beispielrösterei",
+      });
+      updateAll();
+    }
+
+    Object.values(fields).forEach(field => {
+      field.addEventListener("input", updateAll);
+      field.addEventListener("change", updateAll);
+    });
+
+    document.getElementById("fillExampleBtn").addEventListener("click", fillExample);
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      setForm(defaults);
+      updateAll();
+    });
+    document.getElementById("saveRecipeBtn").addEventListener("click", () => {
+      const { form, result } = updateAll();
+      saveRecipeEntry({
+        id: Date.now(),
+        beanName: form.beanName || "Unbenannte Bohne",
+        roaster: form.roaster || "—",
+        form,
+        result,
+      });
+    });
+
+    setForm(loadFormLocally());
+    updateAll();
+    renderSavedRecipes();
+  </script>
+</body>
+</html>
